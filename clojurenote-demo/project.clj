@@ -2,7 +2,7 @@
   :description "Demonstration app to show usage of clojurenote"
   :url "https://github.com/mikebroberts/clojurenote"
   :dependencies [
-  	[org.clojure/clojure "1.4.0"]
+    [org.clojure/clojure "1.4.0"]
     [compojure "1.1.5"]
     [environ "0.4.0"]
     [clojurenote "0.1.0"]

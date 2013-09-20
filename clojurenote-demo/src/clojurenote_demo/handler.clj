@@ -58,10 +58,10 @@
 
 (defroutes app-routes
   (GET "/" [] "<html><body>
-  				<form method='post' action='/login-evernote'>
-  					<button type='submit'>Login to Evernote</button>
-  				</form>
-  				</body></html>")
+          <form method='post' action='/login-evernote'>
+            <button type='submit'>Login to Evernote</button>
+          </form>
+          </body></html>")
 
   (POST "/login-evernote" [] (login-evernote))
 
