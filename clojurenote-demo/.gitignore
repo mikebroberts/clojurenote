@@ -1,8 +1,8 @@
 pom.xml
-pom.xml.asc
 *jar
 /lib/
 /classes/
 /target/
 .lein-deps-sum
 *.sublime-*
+.lein-env
