@@ -6,3 +6,4 @@ pom.xml.asc
 /target/
 .lein-deps-sum
 *.sublime-*
+.lein-repl-history
