@@ -19,9 +19,10 @@
     (.build)))
 
 (defn obtain-request-token 
-  "Retrieve an access token and url that the user should be redirected to so 
-    they can login to Evernote.
-    config must be a map of:
+  "Retrieve an access token and authorization url. The returned map must be used 
+    later when calling obtain-access-token so will most likely be stored temporarily 
+    in the user's session.
+  config must be a map of:
     :key - required - Your project's API key
     :secret - required - Your project's API secret
     :callback - required 
@@ -30,6 +31,8 @@
     :use-sandbox - not required, defaults to false 
                  - if false use Evernote production servers, otherwise use sandbox 
                    servers
+  Returned map will contain a :url entry that you should redirect the user to in
+    order that they can login with Evernote.
     "
   [config]
   (let [service (create-builder config) 
@@ -63,7 +66,8 @@
   "Retrieve an access token for a given verifier and request token.
     - config should be the same as for obtain-request-token. 
     - verifier should be the oauth_verifier passed on the callback url
-    - request token should be the token returned on calling obtain-request-token
+    - request token should be the same map that was returned when obtain-request-token
+      was called
   Returned value will be a map, including:
     - :access-token - the actual access token to be used when calling Evernote API
       on behalf of user
