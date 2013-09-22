@@ -39,7 +39,6 @@
   (-> (create-user-store for-production-evernote?) (.revokeLongSession access-token)))
 
 (defn create-note-store [notestore-url]
-  (println "Creating notestore")
   (let [prot (createProt notestore-url)]
     (com.evernote.edam.notestore.NoteStore$Client. prot prot)))
 

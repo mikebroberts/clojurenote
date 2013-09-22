@@ -1,9 +1,9 @@
 (ns clojurenote-demo.auth
   (:require 
-            [ring.util.response :as resp]
-            [environ.core :as environ]
-            [clojurenote.auth :as auth]
-            ))
+    [ring.util.response :as resp]
+    [environ.core :as environ]
+    [clojurenote.auth :as auth]
+    ))
 
 ; Sample ~/.lein/profiles.clj, or just overwrite calls to environ/env below with your values
 ; For more about environ/env, see https://github.com/weavejester/environ
@@ -36,8 +36,11 @@
   (str "<html><body>
           <p>Successfully logged into Evernote.</p>
           <p>User access token is " (:access-token t) "</p>
+          <p>User notestore URL is " (:notestore-url t) "</p>
+          <p>Copy the access token and notestore URL, then try using the
+            api <a href='/use'>here</a>.</p>
           <p>Full user details are as follows:</p>
-          <code>" t "</code
+          <code>" t "</code>
           </body></html>"
   ))
 

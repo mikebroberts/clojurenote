@@ -72,7 +72,9 @@
     - :access-token - the actual access token to be used when calling Evernote API
       on behalf of user
     - various other user details - :userId, :notestore-url, :shard, 
-                                    :expires, :web-api-url-prefix"
+                                    :expires, :web-api-url-prefix
+  The returned map can be used as-is for the 'user' argument when 
+    calling the clojurenote api functions."
   [config verifier {:keys [token secret rawResponse]}]
   (-> config 
     (create-builder) 
