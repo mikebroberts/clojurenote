@@ -55,4 +55,4 @@
   (cond 
     notestore notestore
     notestore-url (create-note-store notestore-url)
-    :else (throw (Exception. "Must specify :notestore or :notestore-url in en-user map"))))
+    :else (throw (Exception. "Must specify :notestore or :notestore-url in user map"))))
