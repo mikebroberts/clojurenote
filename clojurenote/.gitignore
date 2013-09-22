@@ -7,3 +7,4 @@ pom.xml.asc
 .lein-deps-sum
 *.sublime-*
 .lein-repl-history
+.nrepl-port

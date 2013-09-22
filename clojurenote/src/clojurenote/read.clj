@@ -1,41 +1,49 @@
 (ns clojurenote.read
-  (:require [clojure.tools.reader.edn :as edn])
-  (:use [clojurenote.stores :only [note-store access-token]])
+  (:use [clojurenote.stores :only [note-store]])
   (:import
     (com.evernote.edam.notestore NoteFilter NotesMetadataResultSpec)
     (com.evernote.edam.type NoteSortOrder)
     (com.evernote.edam.type Note)
     (com.evernote.edam.type Notebook)))
 
-(defn list-notebooks []
-  (.listNotebooks (note-store) (access-token)))
+(defn access-token [{access-token :access-token}]
+  (when-not access-token (throw (Exception. "Must specify :access-token in en-user map")))
+  access-token)
 
-(defn find-notebook-by-predicate [pred]
-  (->> (list-notebooks)
+(defn list-notebooks [en-user]
+  (.listNotebooks (note-store en-user) (access-token en-user)))
+
+(defn find-notebook-by-predicate [en-user pred]
+  (->> (list-notebooks en-user)
     (filter pred)
     (first)))
 
-(defn find-notebook-by-name [notebook-name]
-  (find-notebook-by-predicate #(= notebook-name (.getName %))))
+(defn find-notebook-by-name [en-user notebook-name]
+  (find-notebook-by-predicate en-user #(= notebook-name (.getName %))))
 
-(defn find-notebook-by-guid [notebook-guid]
-  (find-notebook-by-predicate #(= notebook-guid (.getGuid %))))
+(defn find-notebook-by-guid [en-user notebook-guid]
+  (find-notebook-by-predicate en-user #(= notebook-guid (.getGuid %))))
 
-(defn basic-notes-for-notebook [notebook-guid]
-  (->>
-    (->
-      (.findNotesMetadata 
-        (note-store)
-        (access-token)
-        (doto (NoteFilter.)
-          (.setNotebookGuid notebook-guid)
-          (.setOrder (.getValue NoteSortOrder/CREATED))
-          (.setAscending false)) 
-        0 
-        100 
-        (NotesMetadataResultSpec.))
-      (.getNotes)) 
-    (map bean)))
+(defn basic-notes-for-notebook [en-user notebook-guid]
+  (->
+    (.findNotesMetadata 
+      (note-store en-user)
+      (access-token en-user)
+      (doto (NoteFilter.)
+        (.setNotebookGuid notebook-guid)
+        (.setOrder (.getValue NoteSortOrder/CREATED))
+        (.setAscending false)) 
+      0 
+      100 
+      (NotesMetadataResultSpec.))
+    (.getNotes)) 
+  )
+
+(defn get-note [en-user guid]
+  (.getNote 
+    (note-store en-user) 
+    (access-token en-user)
+    guid true false false false))
 
 (defn- remove-enml [c]
   (-> c
@@ -46,20 +54,13 @@
     (clojure.string/trim)
     ))
 
-(defn get-note [guid]
-  (-> (.getNote 
-        (note-store) 
-        (access-token)
-        guid true false false false)
-    (bean) 
-    (update-in [:content] remove-enml)))
+(defn plain-content [note]
+  (-> note (.getContent) remove-enml))
 
-(defn get-note-application-data-entry [application-key guid]
-  (-> (note-store)
-    (.getNoteApplicationDataEntry (access-token) guid application-key)
-    (edn/read-string)))
+(defn get-note-application-data-entry [en-user application-key guid]
+  (-> (note-store en-user)
+    (.getNoteApplicationDataEntry (access-token en-user) guid application-key)
+    ))
 
-(defn get-all-tags-for-notebook [notebook-guid]
-  (->>
-    (.listTagsByNotebook (note-store) (access-token) notebook-guid)
-    (map bean)))
+(defn get-all-tags-for-notebook [en-user notebook-guid]
+  (.listTagsByNotebook (note-store en-user) (access-token en-user) notebook-guid))

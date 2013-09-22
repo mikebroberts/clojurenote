@@ -39,6 +39,7 @@
   (-> (create-user-store for-production-evernote?) (.revokeLongSession access-token)))
 
 (defn create-note-store [notestore-url]
+  (println "Creating notestore")
   (let [prot (createProt notestore-url)]
     (com.evernote.edam.notestore.NoteStore$Client. prot prot)))
 
@@ -50,22 +51,8 @@
     noteStoreProt (createProt (.getNoteStoreUrl user-store dev-token))]
     (com.evernote.edam.notestore.NoteStore$Client. noteStoreProt noteStoreProt)))
 
-(def ^:dynamic *note-store* nil)
-(def ^:dynamic *access-token* nil)
-
-(defmacro with-evernote [url token & body] 
-  `(binding [*note-store* (create-note-store ~url) 
-              *access-token* ~token] 
-    ~@body))
-
-(defn note-store []
-  (when-not (thread-bound? #'*note-store*)
-    (throw (Exception. "*note-store* not bound. Execute function within 
-      '(with-evernote...) or manually bind *note-store*")))
-  *note-store*)
-
-(defn access-token []
-  (when-not (thread-bound? #'*access-token*)
-    (throw (Exception. "*access-token* not bound. Execute function within 
-      '(with-evernote ...) or manually bind *access-token*")))
-  *access-token*)
+(defn note-store [{:keys [notestore notestore-url]}]
+  (cond 
+    notestore notestore
+    notestore-url (create-note-store notestore-url)
+    :else (throw (Exception. "Must specify :notestore or :notestore-url in en-user map"))))
