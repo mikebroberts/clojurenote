@@ -1,10 +1,10 @@
 (ns clojurenote-demo.use
   (:require 
-    [clojurenote.read :as api]
+    [clojurenote.notes :as notes]
     ))
 
 (defn list-notebooks [token notestore-url]
-  (let [notebooks (api/list-notebooks {:access-token token :notestore-url notestore-url})]
+  (let [notebooks (notes/list-notebooks {:access-token token :notestore-url notestore-url})]
     (str "<html><body>
           <p>Notebooks for token: " token ", notestore: " notestore-url "</p>"
           "<ul>"
