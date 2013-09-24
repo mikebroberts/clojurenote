@@ -53,13 +53,13 @@ access token and notestore URL. Copy these 2 things down since you'll need them 
 Usage - Notes API
 ------------------------
 
-The usage API is split in two. Most of what you need is based off the Evernote [NoteStore](http://dev.evernote.com/doc/reference/javadoc/com/evernote/edam/notestore/NoteStore.Client.html). You can create a NoteStore with `clojurenote.note/create-note-store` and call any method using interop. Alternatively there a convenience functions that are the bulk of `clojurenotes.notes`
+The usage API is split in two. Most of what you need is based off the Evernote [NoteStore](http://dev.evernote.com/doc/reference/javadoc/com/evernote/edam/notestore/NoteStore.Client.html). You can create a NoteStore with `clojurenote.note/create-note-store` and call any method using interop. Alternatively there are convenience functions that are the bulk of `clojurenotes.notes` .
 
 #### Evernote User
 
 Most API functions take a 'user' map as their first argument. The simplest way of setting this is to use the map you got from 'obtain-access-token' in the authentication phase.
 
-Alternatively the map must consist of the follow entries:
+Alternatively the map must consist of the following entries:
 
 * `:access-token` - The long access token string from the authentication phase
 
@@ -72,7 +72,7 @@ If you are using a [developer token](http://dev.evernote.com/doc/articles/authen
 
 #### API functions
 
-There is a very simple example of using the notes API in the clojurenote-demo `use.clj` namespace. Otherwise here are some repl examples:
+There is a very simple example of using the notes API in the `clojurenote-demo.use` namespace. Otherwise here are some repl examples:
 
 ``` clj
 user=> (use '[clojurenote.notes :as notes])
@@ -104,14 +104,14 @@ user=> (-> (get-note en-user "07b9c34e-b690-4bc1-954e-7b3bd513b01e") (bean) (:co
 
 * Objects returned have not had `bean` called on them due to possible performace constraints within the client application, but that's typically something you'll want to do first if you don't have such constraints.
 * The content for any notes you create must be a valid ENML document. `clojurenote.notes/create-enml-document` will add the headers and footers for such documents.
-* Similary the content of any notes returned from the API will be a full ENML document. Use `clojurenote.notes/remove-enml`
+* Similary the content of any notes returned from the API will be a full ENML document. Use `clojurenote.notes/remove-enml` to remove the headers and footers.
 
-Usage - Notes API
+Usage - Users API
 ------------------------
 
-As mentioned above most of what you need from the Evernote API is based off of the NoteStore (and clojurenote.notes), however there is also some useful stuff in the [UserStore](http://dev.evernote.com/doc/reference/javadoc/com/evernote/edam/userstore/UserStore.Client.html), and this is reflected in the `clojurenote.users` namespace.
+As mentioned above most of what you need from the Evernote API is based off of the NoteStore (and `clojurenote.notes`), however there is also some useful stuff in the [UserStore](http://dev.evernote.com/doc/reference/javadoc/com/evernote/edam/userstore/UserStore.Client.html), and this is reflected in the `clojurenote.users` namespace.
 
-All of functions in `clojurenote.users` require a service argument, which should be one of `:production`, `:sandbox`, or `:yinxiang`, depending on which Evernote service you are accessing. Some also take an `access-token` argument, which is the long `:access-token` string returned that is part of the map returned by `clojurenote.auth/obtain-access-token`, or your developer token if you're using developer tokens.
+All of the functions in `clojurenote.users` require a service argument, which should be one of `:production`, `:sandbox`, or `:yinxiang`, depending on which Evernote service you are accessing. Some also take an `access-token` argument, which is the long `:access-token` string returned that is part of the map returned by `clojurenote.auth/obtain-access-token`, or your developer token if you're using developer tokens.
 
 Here are some examples:
 
