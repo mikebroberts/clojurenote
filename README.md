@@ -90,6 +90,9 @@ user=> (create-notebook en-user "TestNotebook")
 user=> (find-notebook-by-name en-user "TestNotebook")
 #<Notebook Notebook(guid:...)>
 
+user => (map (comp :title bean (partial get-note en-user) :guid bean) (basic-notes-for-notebook en-user "my-notebook-guid"))
+("Note 1 Title" "Note 2 Title")
+
 user=> (write-note en-user "my-notebook-guid" "First note" (create-enml-document "My content") nil nil)
 #<Note Note(guid:...)>
 
