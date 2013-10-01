@@ -75,7 +75,7 @@ If you are using a [developer token](http://dev.evernote.com/doc/articles/authen
 There is a very simple example of using the notes API in the `clojurenote-demo.use` namespace. Otherwise here are some repl examples:
 
 ``` clj
-user=> (use '[clojurenote.notes :as notes])
+user=> (use 'clojurenote.notes)
 nil
 
 user=> (def en-user {:access-token "My-Access-Token" :notestore-url "https://sandbox.evernote.com/shard/s1/notestore"})
