@@ -69,18 +69,6 @@
     (access-token user)
     guid true false false false))
 
-(defn remove-enml [c]
-  (-> c
-    (clojure.string/replace "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" "")
-    (clojure.string/replace "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">" "")
-    (clojure.string/replace "<en-note>" "")
-    (clojure.string/replace "</en-note>" "")
-    (clojure.string/trim)
-    ))
-
-(defn plain-content [note]
-  (-> note (.getContent) remove-enml))
-
 (defn get-note-application-data-entry [user application-key guid]
   (-> (note-store user)
     (.getNoteApplicationDataEntry (access-token user) guid application-key)
@@ -89,21 +77,73 @@
 (defn get-all-tags-for-notebook [user notebook-guid]
   (.listTagsByNotebook (note-store user) (access-token user) notebook-guid))
 
+(defn byte-to-hex [b]
+  (let [intVal (bit-and 0xFF b)]
+    (str (when (< intVal 0x10) "0") (Integer/toHexString intVal))))
+
+; based on https://github.com/vanduynslagerp/enml4j/blob/master/src/main/java/com/syncthemall/enml4j/util/Utils.java -> bytesToHex
+(defn bytes-to-hex [bs]
+  (apply str (map byte-to-hex bs)))
+
+(defn resource->bean-with-body-hash-hex [res]
+  "Takes a Resource (as returned by Note.getResources) and:
+  - converts it to a map with bean (non recursively - data, recognition and attributes are still in Java Object form)
+  - sets :body-hash-hex to be the hexadecimal string of .getBodyHash (and which can then be matched to the hash in <en-media> tags)
+  - prunes out unnecessary fields, plus the fields"
+  (-> res
+    (bean)
+    (#(assoc % :body-hash-hex (->> % (:data) (.getBodyHash) (bytes-to-hex))))
+    (select-keys [:guid :noteGuid :mime :width :height :updateSequenceNum 
+      :body-hash-hex :data :recognition :attributes])
+  ))
+
+(defn entity->guid [entity]
+  "Returns the guid of an entity that has a 'guid' field. 
+    Works whether the entity is the original Java object, or whether it has been bean'ed"
+  (if-let [guid (:guid entity)]
+    guid
+    (.getGuid entity)))
+
+(defn resource-url [web-api-url-prefix res]
+  "Returns the URL for downloading a resource, as described at http://dev.evernote.com/doc/articles/resources.php#downloading
+  - web-api-url-prefix must be the webApiUrlPrefix field of the user's PublicUserInfo. To get this do something like:
+    (-> (clojurenote.users/get-public-user-info-for-username username) (.getWebApiUrlPrefix))
+  - res should be the resource object taken from the resources list of the original note. It can be the original java object,
+    or a bean'ed version"
+  (str web-api-url-prefix "res/" (entity->guid res)))
+
+(defn- thumbnail-url [web-api-url-prefix entity-type entity & {:keys [img-format size]}]
+  (str
+    web-api-url-prefix
+    "thm/"
+    (name entity-type)
+    "/"
+    (entity->guid entity)
+    (when img-format (str "." img-format))
+    (when size (str "?size=" size))
+    ))
+
+(defn resource-thumbnail-url [web-api-url-prefix res & options]
+  "Return the URL for the thumbnail of a given resource, as described at http://dev.evernote.com/doc/articles/thumbnails.php
+  - web-api-url-prefix must the same as for clojurenote.notes/resource-url
+  - res should be the resource object taken from the resources list of the original note. It can be the original java object,
+    or a bean'ed version
+  - options are named parameters as follows:
+    - :img-format [one of jpg, gif, bmp, png]
+    - :size size (recommended to be 75, 150 or 300)"
+  (apply (partial thumbnail-url web-api-url-prefix :res res) options))
+
+(defn note-thumbnail-url [web-api-url-prefix note & options]
+  "Return the URL for the thumbnail of a note, as described at http://dev.evernote.com/doc/articles/thumbnails.php.
+  Parameters are the same as resource-thumbnail-url, except swap resource for note"
+  (apply (partial thumbnail-url web-api-url-prefix :note note) options))
+
 ; ** WRITE FUNCTIONS **
 
 (defn create-notebook [user notebook-name]
   (->> 
     (doto (Notebook.) (.setName notebook-name))
     (.createNotebook (note-store user) (access-token user))))
-
-(def enml-header (str "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-        "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
-        "<en-note>"))
-
-(def enml-footer "</en-note>")
-
-(defn create-enml-document [content]
-  (format (str enml-header "%s" enml-footer) (if content content "")))
 
 (defn write-note [user notebook-guid title content-document date tag-names]
   (->> 

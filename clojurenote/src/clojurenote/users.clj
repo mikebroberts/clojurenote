@@ -26,6 +26,15 @@
 (defn get-user-details [service access-token]
   (-> (create-user-store service) (.getUser access-token)))
 
+(defn get-public-user-info-for-username [service username]
+  (-> (create-user-store service) (.getPublicUserInfo username)))
+
+(defn get-public-user-info-for-access-token [service access-token]
+  (->
+    (get-user-details service access-token)
+    (.getUsername)
+    (->> (get-public-user-info-for-username service))))
+
 (defn get-notestore-url [service access-token]
   (-> (create-user-store service) (.getNoteStoreUrl access-token)))
 
