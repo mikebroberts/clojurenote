@@ -12,11 +12,12 @@
   (let [protocol (protocol-for notestore-url)]
     (com.evernote.edam.notestore.NoteStore$Client. protocol protocol)))
 
-(defn create-note-store-with-developer-token [service dev-token]
+(defn create-note-store-with-developer-token 
   "Only use if you're using a developer token, rather than OAuth, to authenticate.
     service should be a key from the clojurenote.users/services map.
     For more info about developer keys see
     http://dev.evernote.com/doc/articles/authentication.php#devtoken"
+  [service dev-token]
   (-> 
     (users/create-user-store service)
     (.getNoteStoreUrl dev-token)
@@ -85,11 +86,14 @@
 (defn bytes-to-hex [bs]
   (apply str (map byte-to-hex bs)))
 
-(defn resource->bean-with-body-hash-hex [res]
+(defn resource->bean-with-body-hash-hex 
   "Takes a Resource (as returned by Note.getResources) and:
   - converts it to a map with bean (non recursively - data, recognition and attributes are still in Java Object form)
   - sets :body-hash-hex to be the hexadecimal string of .getBodyHash (and which can then be matched to the hash in <en-media> tags)
-  - prunes out unnecessary fields, plus the fields"
+  - prunes out unnecessary fields, plus the fields.
+  This is typically useful when needing the resources hashes when translating <en-media> tags
+  in the Note's content."
+  [res]
   (-> res
     (bean)
     (#(assoc % :body-hash-hex (->> % (:data) (.getBodyHash) (bytes-to-hex))))
@@ -104,12 +108,13 @@
     guid
     (.getGuid entity)))
 
-(defn resource-url [web-api-url-prefix res]
+(defn resource-url 
   "Returns the URL for downloading a resource, as described at http://dev.evernote.com/doc/articles/resources.php#downloading
   - web-api-url-prefix must be the webApiUrlPrefix field of the user's PublicUserInfo. To get this do something like:
     (-> (clojurenote.users/get-public-user-info-for-username username) (.getWebApiUrlPrefix))
   - res should be the resource object taken from the resources list of the original note. It can be the original java object,
     or a bean'ed version"
+  [web-api-url-prefix res]
   (str web-api-url-prefix "res/" (entity->guid res)))
 
 (defn- thumbnail-url [web-api-url-prefix entity-type entity & {:keys [img-format size]}]
@@ -123,7 +128,7 @@
     (when size (str "?size=" size))
     ))
 
-(defn resource-thumbnail-url [web-api-url-prefix res & options]
+(defn resource-thumbnail-url 
   "Return the URL for the thumbnail of a given resource, as described at http://dev.evernote.com/doc/articles/thumbnails.php
   - web-api-url-prefix must the same as for clojurenote.notes/resource-url
   - res should be the resource object taken from the resources list of the original note. It can be the original java object,
@@ -131,6 +136,7 @@
   - options are named parameters as follows:
     - :img-format [one of jpg, gif, bmp, png]
     - :size size (recommended to be 75, 150 or 300)"
+  [web-api-url-prefix res & options]
   (apply (partial thumbnail-url web-api-url-prefix :res res) options))
 
 (defn note-thumbnail-url [web-api-url-prefix note & options]

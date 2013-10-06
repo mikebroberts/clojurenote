@@ -14,6 +14,7 @@ A library that wraps the [official Evernote Java API](https://github.com/evernot
 
 * OAuth authentication (using [Scribe Java](https://github.com/fernandezpablo85/scribe-java))
 * Basic read/write capabilities, using an OAuth access token, or developer token.
+* ENML to HTML translation
 
 Installation
 -------------
@@ -21,7 +22,7 @@ Installation
 Include the following dependency in your `project.clj` file:
 
 ```clojure
-:dependencies [[clojurenote "0.2.0"]]
+:dependencies [[clojurenote "0.3.0"]]
 ```
 
 Prerequisites
@@ -72,7 +73,7 @@ If you are using a [developer token](http://dev.evernote.com/doc/articles/authen
 
 #### API functions
 
-There is a very simple example of using the notes API in the `clojurenote-demo.use` namespace. Otherwise here are some repl examples:
+There is a very simple example of using the notes API in the `clojurenote-demo.use` namespace. Otherwise here are some repl examples, including use of the `clojurenote.enml` namespace described in the next section :
 
 ``` clj
 user=> (use 'clojurenote.notes)
@@ -93,21 +94,45 @@ user=> (find-notebook-by-name en-user "TestNotebook")
 user=> (map (comp :title bean (partial get-note en-user) :guid bean) (basic-notes-for-notebook en-user "my-notebook-guid"))
 ("Note 1 Title" "Note 2 Title")
 
+user=> (use 'clojurenote.enml)
+nil
+
 user=> (write-note en-user "my-notebook-guid" "First note" (create-enml-document "My content") nil nil)
 #<Note Note(guid:...)>
 
 user=> (get-note en-user "my-note-guid")
 #<Note Note(guid:...)>
 
-user=> (-> (get-note en-user "07b9c34e-b690-4bc1-954e-7b3bd513b01e") (bean) (:content) (remove-enml))
-"My content"
+user=> (-> (get-note en-user "my-note-guid") (note->html))
+"<div>\nMy content\n</div>\n"
 ``` 
+
+Various functions for working with [Note Resources](http://dev.evernote.com/doc/reference/javadoc/com/evernote/edam/type/Resource.html) are also provided. Read the documentation in the source for more.
 
 #### Notes
 
 * Objects returned have not had `bean` called on them due to possible performace constraints within the client application, but that's typically something you'll want to do first if you don't have such constraints.
-* The content for any notes you create must be a valid ENML document. `clojurenote.notes/create-enml-document` will add the headers and footers for such documents.
-* Similary the content of any notes returned from the API will be a full ENML document. Use `clojurenote.notes/remove-enml` to remove the headers and footers.
+* The content for any notes you create must be a valid ENML document, and the content of returned notes will be ENML documents. See the next section for more on this subject.
+
+Usage - ENML to HTML translation
+----------------------------------
+
+The content field of an Evernote Note is an ENML document. ENML is XHTML with a few extra Evernote specific tags, and some other tags removed. For more information see [here](http://dev.evernote.com/doc/articles/enml.php).
+
+The `clojurenote.enml` namespace provides the `note->html` (which takes a whole Note) and `enml->html` (which takes a specified pre-retrived ENML document) functions to map to regular HTML. They do 2 things:
+- Remove the XML headers
+- Translate the `<en-*` tags to html equivalents.
+
+The default behavior of the translations are:
+- replace `<en-note>` with `<div>`, keeping all attributes
+- replace `<en-media>`, `<en-crypt>` and `<en-todo>` with plain spans
+
+The translation behavior can configured by specifying the `en-tag-fns` map when calling either of the `*->html` functions, consisting of a map of the same structure as `default-en-tag-fns`. Each function within this map takes an xml node, as returned by a parsing of the ENML with `clojure.xml`. 
+
+Typically you'll want to at least do something more useful for `<en-media>` tags, based on the `hash` attribute. A simple example translating `<en-media>` to `<img>` tags is given in `en-media->simple-img-fn`. An example of converting an `<en-note>` tag to an actual HTML document is given in `en-note->html-document`.
+
+The namespace also contains the `create-enml-document` function to create the basic structure of an ENML document. It will only create the header and footer though - the remaining content must already be valid ENML.
+
 
 Usage - Users API
 ------------------------
