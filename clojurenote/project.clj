@@ -7,4 +7,10 @@
     [org.clojure/clojure "1.4.0"]
     [org.scribe/scribe "1.3.5"]
     [com.evernote/evernote-api "1.25"]
+    [expectations "1.4.52"]
+    [org.mockito/mockito-all "1.8.0"]
+  ]
+  :plugins [
+    [lein-expectations "0.0.7"]
+    [lein-autoexpect "1.0"]
   ])
