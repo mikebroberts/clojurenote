@@ -9,8 +9,6 @@
     [erajure.core]
     ))
 
-; --
-
 (expect
   "actual-notestore"
   (note-store {:notestore "actual-notestore" :notestore-url "Shouldn't be used"}))
@@ -19,7 +17,7 @@
 (def test-notebook-2 (doto (Notebook.) (.setName "Book2") (.setGuid "Guid2")))
 (def all-notebooks [test-notebook-1 test-notebook-2])
 
-; In this test we actual stub out the create-note-store fn to show how it will be used when a user
+; In this test we actually stub out the create-note-store fn to show how it will be used when a user
 ; specifies notestore by url
 ; In subsequent tests we'll just pass a stub note store in the user map
 (defn stub-create-note-store [url]
