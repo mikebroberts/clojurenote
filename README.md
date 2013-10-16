@@ -3,10 +3,6 @@ clojurenote
 
 A Clojure library to access the Evernote API. 
 
-This is still in early days. Please feel free to bug me about errors / ommissions!
-
-I'm still to add tests, but this code is almost the same as that which I've been running in production for a couple of months.
-
 Overview
 -------------
 
