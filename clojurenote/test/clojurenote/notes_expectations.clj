@@ -63,6 +63,33 @@
     (basic-notes-for-notebook {:notestore stub-store :access-token "my-token"} "my-notebook-guid")
     ))
 
+(expect
+  all-notes-metadata
+  (let [expected-filter (doto (NoteFilter.)
+                          (.setNotebookGuid "my-notebook-guid")
+                          (.setOrder (.getValue NoteSortOrder/RELEVANCE))
+                          (.setAscending true))
+        stub-store
+        (mock NoteStoreIface
+              (behavior (.findNotesMetadata "my-token" expected-filter
+                                            50 20
+                                            (doto (NotesMetadataResultSpec.) (.setIncludeTitle true)))
+                        (doto (NotesMetadataList.) (.setNotes all-notes-metadata))))]
+
+    (basic-notes-for-notebook
+      {:notestore stub-store :access-token "my-token"}
+      "my-notebook-guid"
+      :note-filter (doto (NoteFilter.)
+                     (.setNotebookGuid "my-notebook-guid")
+                     (.setOrder (.getValue NoteSortOrder/RELEVANCE))
+                     (.setAscending true))
+      :offset 50
+      :max-notes 20
+      :result-spec (doto (NotesMetadataResultSpec.) (.setIncludeTitle true))
+      )
+    ))
+
+
 (def note (doto (Note.) (.setTitle "Note 1")))
 
 (expect
@@ -70,6 +97,12 @@
   (let [stub-store (mock NoteStoreIface
                      (behavior (.getNote "my-token" "my-note-guid" true false false false) note))]
     (get-note {:notestore stub-store :access-token "my-token"} "my-note-guid")))
+
+(expect
+  note
+  (let [stub-store (mock NoteStoreIface
+                         (behavior (.getNote "my-token" "my-note-guid" true true false false) note))]
+    (get-note {:notestore stub-store :access-token "my-token"} "my-note-guid" :with-resources-data true)))
 
 (expect
   "my-app-data"
@@ -146,7 +179,15 @@
                 (doto (Note.) (.setTitle "My Note") (.setNotebookGuid "nb-guid")
                               (.setContent "My content"))))
             (write-note {:notestore store :access-token "my-token"}
-                        "nb-guid" "My Note" "My content" nil nil))
+                        "nb-guid" "My Note" "My content"))
+
+(expect-let [store (mock NoteStoreIface)]
+            (interaction
+              (.createNote store "my-token"
+                           (doto (Note.) (.setTitle "My Note") (.setNotebookGuid "nb-guid")
+                                         (.setContent "My content") (.setCreated 1234))))
+            (write-note {:notestore store :access-token "my-token"}
+                        "nb-guid" "My Note" "My content" 1234))
 
 (expect-let [store (mock NoteStoreIface)]
             (interaction

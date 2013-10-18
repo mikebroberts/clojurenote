@@ -49,26 +49,36 @@
 (defn find-notebook-by-guid [user notebook-guid]
   (find-notebook-by-predicate user #(= notebook-guid (.getGuid %))))
 
-(defn basic-notes-for-notebook [user notebook-guid]
+(defn basic-notes-for-notebook
+  "Get basic notes (i.e. without content) for a notebook. Is basically just a call to
+  NoteStore.findNotesMetadata with defaults, and those defaults are overridable using optional
+  arguments."
+  [user notebook-guid &
+   {:keys [note-filter offset max-notes result-spec]
+    :or {note-filter (doto (NoteFilter.)
+                       (.setNotebookGuid notebook-guid)
+                       (.setOrder (.getValue NoteSortOrder/CREATED))
+                       (.setAscending false))
+         offset 0
+         max-notes 100
+         result-spec (NotesMetadataResultSpec.)}}]
   (->
-    (.findNotesMetadata 
-      (note-store user)
-      (access-token user)
-      (doto (NoteFilter.)
-        (.setNotebookGuid notebook-guid)
-        (.setOrder (.getValue NoteSortOrder/CREATED))
-        (.setAscending false)) 
-      0 
-      100 
-      (NotesMetadataResultSpec.))
+    (note-store user)
+    (.findNotesMetadata (access-token user) note-filter offset max-notes result-spec)
     (.getNotes)) 
   )
 
-(defn get-note [user guid]
-  (.getNote 
+(defn get-note
+  "Get note for user and GUID. By default retrieves content, but not other options
+  (See NoteStore.getNote for details of options)"
+  [user guid &
+   {:keys [with-content with-resources-data with-resources-recognition with-resources-alternate-data]
+    :or {with-content true with-resources-data false
+         with-resources-recognition false with-resources-alternate-data false}}]
+  (.getNote
     (note-store user) 
     (access-token user)
-    guid true false false false))
+    guid with-content with-resources-data with-resources-recognition with-resources-alternate-data))
 
 (defn get-note-application-data-entry [user application-key guid]
   (-> (note-store user)
@@ -151,7 +161,12 @@
     (doto (Notebook.) (.setName notebook-name))
     (.createNotebook (note-store user) (access-token user))))
 
-(defn write-note [user notebook-guid title content-document date tag-names]
+(defn write-note
+  ([user notebook-guid title content-document]
+   (write-note user notebook-guid title content-document nil))
+  ([user notebook-guid title content-document date]
+   (write-note user notebook-guid title content-document date nil))
+  ([user notebook-guid title content-document date tag-names]
   (->> 
     (doto (Note.)
       (.setTitle title)
@@ -160,7 +175,7 @@
       (#(if date (.setCreated % date)))
       (#(if (seq tag-names) (.setTagNames % tag-names))))
     (.createNote (note-store user) (access-token user))
-    ))
+    )))
 
 (defn set-note-application-data-entry [user application-key guid application-data-entry]
   (.setNoteApplicationDataEntry

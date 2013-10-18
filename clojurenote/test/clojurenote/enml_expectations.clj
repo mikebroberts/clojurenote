@@ -41,7 +41,7 @@
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     <!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">
     <en-note>Hello</en-note>"
-    (assoc default-en-tag-fns :en-note en-note->html-document)))
+    :en-note en-note->html-document))
 
 ; Mapping media tags using example fn
 (expect
@@ -50,8 +50,7 @@
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     <!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">
     <en-note><en-media hash=\"96d170e1f8819cc5179ca102110a5962\" type=\"image/jpeg\"></en-media></en-note>"
-    (assoc default-en-tag-fns
-      :en-media (en-media->simple-img-fn {"96d170e1f8819cc5179ca102110a5962" "my-image.jpg"}))))
+    :en-media (en-media->simple-img-fn {"96d170e1f8819cc5179ca102110a5962" "my-image.jpg"})))
 
 ; Use two different mapper fns, also shows what media fn does for non image tags
 (expect
@@ -60,9 +59,8 @@
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     <!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">
     <en-note><en-media hash=\"96d170e1f8819cc5179ca102110a5962\" type=\"audio/wav\"></en-media></en-note>"
-    (assoc default-en-tag-fns
-      :en-note en-note->html-document
-      :en-media (en-media->simple-img-fn {}))))
+    :en-note en-note->html-document
+    :en-media (en-media->simple-img-fn {})))
 
 (expect
   "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\"><en-note><p>Hello</p></en-note>"

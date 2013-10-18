@@ -50,23 +50,25 @@
     (tag-fn node)
     node))
 
+(defn walk-fn [user-supplied-tag-fns]
+  (partial replace-tags (into default-en-tag-fns (apply hash-map user-supplied-tag-fns))))
+
 (defn enml->html
   "Translates an ENML document to HTML by removing headers and translating <en-*> tags.
   Default translation is simplist possible, but won't (for example) map <en-media> tags
   to <img> tags. Specify optional en-tag-fns argument in order to customize the tag
   translation behavior. See documentation on default-en-tag-fns for more detail." 
-  ([enml] (enml->html enml default-en-tag-fns))
-  ([enml en-tag-fns]
+  [enml & optional-en-tag-fns]
     (->>
       enml
       (remove-headers)
       (.getBytes)
       (java.io.ByteArrayInputStream.)
       (xml/parse)
-      (postwalk (partial replace-tags en-tag-fns))
+      (postwalk (walk-fn optional-en-tag-fns))
       (xml/emit-element)
       (with-out-str)
-      )))
+      ))
 
 (defn note->html 
   "Same as enml->html (including the same optional argument), but takes a Note instead of
