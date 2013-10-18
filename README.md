@@ -95,7 +95,7 @@ user=> (map (comp :title bean (partial get-note en-user) :guid bean) (basic-note
 user=> (use 'clojurenote.enml)
 nil
 
-user=> (write-note en-user "my-notebook-guid" "First note" (create-enml-document "My content") nil nil)
+user=> (write-note en-user "my-notebook-guid" "First note" (create-enml-document "My content"))
 #<Note Note(guid:...)>
 
 user=> (get-note en-user "my-note-guid")
