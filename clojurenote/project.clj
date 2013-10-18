@@ -1,4 +1,4 @@
-(defproject clojurenote "0.3.0"
+(defproject clojurenote "0.4.0"
   :description "Clojure library to access Evernote API"
   :url "https://github.com/mikebroberts/clojurenote"
   :license {:name "The MIT License"

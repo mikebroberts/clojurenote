@@ -5,7 +5,7 @@
     [org.clojure/clojure "1.4.0"]
     [compojure "1.1.5"]
     [environ "0.4.0"]
-    [clojurenote "0.2.0"]
+    [clojurenote "0.4.0"]
   ]
   :plugins [
     [lein-ring "0.8.2"]
