@@ -14,10 +14,6 @@
   Exception
   (user-store-url :something-else))
 
-(expect
-  UserStore$Client
-  (create-user-store :sandbox))
-
 (defn stub-create-user-store [stub-user-store]
   (fn [service]
     (when (= :sandbox service) stub-user-store)))
