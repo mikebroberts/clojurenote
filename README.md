@@ -18,7 +18,7 @@ Installation
 Include the following dependency in your `project.clj` file:
 
 ```clojure
-:dependencies [[clojurenote "0.3.0"]]
+:dependencies [[clojurenote "0.4.0"]]
 ```
 
 Prerequisites
@@ -69,7 +69,9 @@ If you are using a [developer token](http://dev.evernote.com/doc/articles/authen
 
 #### API functions
 
-There is a very simple example of using the notes API in the `clojurenote-demo.use` namespace. Otherwise here are some repl examples, including use of the `clojurenote.enml` namespace described in the next section :
+There is a very simple example of using the notes API in the `clojurenote-demo.use` namespace. There are also several examples in the `clojurenote.notes-expectations` tests namespace.
+
+Otherwise here are some repl examples, including use of the `clojurenote.enml` namespace described in the next section :
 
 ``` clj
 user=> (use 'clojurenote.notes)
@@ -93,7 +95,7 @@ user=> (map (comp :title bean (partial get-note en-user) :guid bean) (basic-note
 user=> (use 'clojurenote.enml)
 nil
 
-user=> (write-note en-user "my-notebook-guid" "First note" (create-enml-document "My content") nil nil)
+user=> (write-note en-user "my-notebook-guid" "First note" (create-enml-document "My content"))
 #<Note Note(guid:...)>
 
 user=> (get-note en-user "my-note-guid")
@@ -123,12 +125,13 @@ The default behavior of the translations are:
 - replace `<en-note>` with `<div>`, keeping all attributes
 - replace `<en-media>`, `<en-crypt>` and `<en-todo>` with plain spans
 
-The translation behavior can configured by specifying the `en-tag-fns` map when calling either of the `*->html` functions, consisting of a map of the same structure as `default-en-tag-fns`. Each function within this map takes an xml node, as returned by a parsing of the ENML with `clojure.xml`. 
+The translation behavior can configured by specifying optional name / fn pairs when calling either of the `*->html` functions, where the names are the same as those in `default-en-tag-fns`. Each function takes an xml node, as returned by a parsing of the ENML with `clojure.xml`. 
 
 Typically you'll want to at least do something more useful for `<en-media>` tags, based on the `hash` attribute. A simple example translating `<en-media>` to `<img>` tags is given in `en-media->simple-img-fn`. An example of converting an `<en-note>` tag to an actual HTML document is given in `en-note->html-document`.
 
 The namespace also contains the `create-enml-document` function to create the basic structure of an ENML document. It will only create the header and footer though - the remaining content must already be valid ENML.
 
+Look at the `clojurenote.enml-expectations` namespace for examples.
 
 Usage - Users API
 ------------------------
