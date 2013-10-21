@@ -21,6 +21,8 @@ Include the following dependency in your `project.clj` file:
 :dependencies [[clojurenote "0.4.0"]]
 ```
 
+[![Build Status](https://travis-ci.org/mikebroberts/clojurenote.png?branch=master)](https://travis-ci.org/mikebroberts/clojurenote)
+
 Prerequisites
 ---------------
 
